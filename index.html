@@ -2,8 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>久保の自己紹介</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+<title>スマホ誘惑クラッシャー</title>
 <style>
 body{
   margin:0;
@@ -11,44 +10,142 @@ body{
   display:flex;
   justify-content:center;
   align-items:center;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  font-family:'Poppins', sans-serif;
-}
-
-.card{
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(18px);
-  padding:60px 40px;
-  border-radius:30px;
-  text-align:center;
-  width:350px;
+  background: linear-gradient(135deg,#141e30,#243b55);
+  font-family:sans-serif;
   color:white;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
 }
 
-h1{
-  font-size:3em;
-  margin:0;
-  letter-spacing:3px;
-  font-weight:600;
+.container{
+  text-align:center;
 }
 
-.line{
-  width:60px;
-  height:3px;
-  background:white;
-  margin:20px auto 0;
-  border-radius:2px;
-  opacity:0.8;
+.grid{
+  display:grid;
+  grid-template-columns: repeat(3,100px);
+  gap:15px;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.cell{
+  width:100px;
+  height:100px;
+  background:#333;
+  border-radius:15px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:40px;
+  cursor:pointer;
+}
+
+.score, .timer{
+  margin:5px;
+  font-size:1.2em;
+}
+
+button{
+  margin-top:15px;
+  padding:8px 20px;
+  border:none;
+  border-radius:20px;
+  cursor:pointer;
 }
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>久保</h1>
-  <div class="line"></div>
+<div class="container">
+  <h1>📱 スマホ誘惑クラッシャー</h1>
+  <div class="timer">残り時間: 20</div>
+  <div class="score">スコア: 0</div>
+  <div class="grid" id="grid"></div>
+  <button onclick="startGame()">スタート</button>
 </div>
+
+<script>
+const grid = document.getElementById("grid");
+const scoreDisplay = document.querySelector(".score");
+const timerDisplay = document.querySelector(".timer");
+
+let score = 0;
+let time = 20;
+let gameInterval;
+let itemInterval;
+let cells = [];
+
+for(let i=0;i<9;i++){
+  const cell = document.createElement("div");
+  cell.classList.add("cell");
+  grid.appendChild(cell);
+  cells.push(cell);
+}
+
+function showItem(){
+  cells.forEach(c => c.textContent = "");
+
+  const random = Math.floor(Math.random()*9);
+  const type = Math.random();
+
+  if(type < 0.7){
+    cells[random].textContent = "📱"; // 普通
+    cells[random].dataset.type = "phone";
+  }else if(type < 0.9){
+    cells[random].textContent = "🔔"; // レア
+    cells[random].dataset.type = "notice";
+  }else{
+    cells[random].textContent = "🪫"; // 即終了
+    cells[random].dataset.type = "danger";
+  }
+}
+
+cells.forEach(cell=>{
+  cell.onclick = function(){
+    if(!cell.dataset.type) return;
+
+    if(cell.dataset.type === "phone"){
+      score++;
+    }else if(cell.dataset.type === "notice"){
+      score += 3;
+    }else if(cell.dataset.type === "danger"){
+      alert("🪫 バッテリー切れ！ゲーム終了！");
+      endGame();
+      return;
+    }
+
+    scoreDisplay.textContent = "スコア: " + score;
+    cell.textContent = "";
+    cell.dataset.type = "";
+  }
+});
+
+function startGame(){
+  score = 0;
+  time = 20;
+  scoreDisplay.textContent = "スコア: 0";
+  timerDisplay.textContent = "残り時間: 20";
+
+  clearInterval(gameInterval);
+  clearInterval(itemInterval);
+
+  gameInterval = setInterval(function(){
+    time--;
+    timerDisplay.textContent = "残り時間: " + time;
+    if(time <= 0){
+      alert("結果は " + score + " 点！");
+      endGame();
+    }
+  },1000);
+
+  itemInterval = setInterval(showItem, 700);
+}
+
+function endGame(){
+  clearInterval(gameInterval);
+  clearInterval(itemInterval);
+  cells.forEach(c => c.textContent = "");
+}
+</script>
 
 </body>
 </html>
